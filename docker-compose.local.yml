@@ -1,0 +1,161 @@
+services:
+  user-db:
+    image: postgres:16
+    container_name: user-db
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: user_user
+      POSTGRES_PASSWORD: user_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user_user -d user_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  service-db:
+    image: postgres:16
+    container_name: service-db
+    environment:
+      POSTGRES_DB: service_db
+      POSTGRES_USER: service_user
+      POSTGRES_PASSWORD: service_password
+    ports:
+      - "5434:5432"
+    volumes:
+      - service_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U service_user -d service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  booking-db:
+    image: postgres:16
+    container_name: booking-db
+    environment:
+      POSTGRES_DB: booking_db
+      POSTGRES_USER: booking_user
+      POSTGRES_PASSWORD: booking_password
+    ports:
+      - "5435:5432"
+    volumes:
+      - booking_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U booking_user -d booking_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  review-db:
+    image: postgres:16
+    container_name: review-db
+    environment:
+      POSTGRES_DB: review_db
+      POSTGRES_USER: review_user
+      POSTGRES_PASSWORD: review_password
+    ports:
+      - "5436:5432"
+    volumes:
+      - review_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U review_user -d review_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "8000:8000"
+    command: sh -c "python -m alembic upgrade head && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    volumes:
+      - ./user-service:/app
+    environment:
+      DATABASE_URL: postgresql://user_user:user_password@user-db:5432/user_db
+      SECRET_KEY: super_secret_key_change_me
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+    depends_on:
+      user-db:
+        condition: service_healthy
+
+  service-management:
+    build: ./service-management
+    container_name: service-management
+    ports:
+      - "8001:8001"
+    command: sh -c "python -m alembic upgrade head && python -m uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload"
+    volumes:
+      - ./service-management:/app
+    environment:
+      DATABASE_URL: postgresql://service_user:service_password@service-db:5432/service_db
+      SECRET_KEY: super_secret_key_change_me
+      ALGORITHM: HS256
+    depends_on:
+      service-db:
+        condition: service_healthy
+
+  booking-service:
+    build: ./booking-service
+    container_name: booking-service
+    ports:
+      - "8002:8002"
+    command: sh -c "python -m alembic upgrade head && python -m uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload"
+    volumes:
+      - ./booking-service:/app
+    environment:
+      DATABASE_URL: postgresql://booking_user:booking_password@booking-db:5432/booking_db
+      SECRET_KEY: super_secret_key_change_me
+      ALGORITHM: HS256
+      SERVICE_MANAGEMENT_URL: http://service-management:8001
+    depends_on:
+      booking-db:
+        condition: service_healthy
+      service-management:
+        condition: service_started
+
+  review-service:
+    build: ./review-service
+    container_name: review-service
+    ports:
+      - "8003:8003"
+    command: sh -c "python -m alembic upgrade head && python -m uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload"
+    volumes:
+      - ./review-service:/app
+    environment:
+      DATABASE_URL: postgresql://review_user:review_password@review-db:5432/review_db
+      SECRET_KEY: super_secret_key_change_me
+      ALGORITHM: HS256
+    depends_on:
+      review-db:
+        condition: service_healthy
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+    volumes:
+      - ./api-gateway:/app
+    environment:
+      USER_SERVICE_URL: http://user-service:8000
+      SERVICE_MANAGEMENT_URL: http://service-management:8001
+      BOOKING_SERVICE_URL: http://booking-service:8002
+      REVIEW_SERVICE_URL: http://review-service:8003
+    depends_on:
+      - user-service
+      - service-management
+      - booking-service
+      - review-service
+
+volumes:
+  user_db_data:
+  service_db_data:
+  booking_db_data:
+  review_db_data:

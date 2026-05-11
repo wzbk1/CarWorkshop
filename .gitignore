@@ -1,0 +1,30 @@
+# Środowiska wirtualne i zależności
+venv/
+env/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node i frontend
+node_modules/
+dist/
+.npm/
+
+# Zmienne środowiskowe i sekrety (BARDZO WAŻNE!)
+.env
+*.env
+.env.*
+
+# Klucze dostępu SSH
+*.pem
+*.key
+
+# Archiwa i logi
+*.tar.gz
+*.zip
+*.log
+logs.txt
+
+# Pliki systemowe
+.DS_Store
+Thumbs.db
