@@ -12,36 +12,34 @@ const Navbar = ({ isLoggedIn, isAdmin, onLogout, setView, onShowCars, me, theme,
         </a>
         
         <div className="nav-links">
-          <button className="btn btn-outline" onClick={() => setView('locations')}>
-            <i className="fas fa-search me-1"></i> Warsztaty
+          <button className="nav-item" onClick={() => setView('locations')}>
+            <i className="fas fa-search"></i> <span>Warsztaty</span>
           </button>
           
           {isLoggedIn ? (
             <>
-              <button className="btn btn-outline" onClick={() => setView('my-bookings')}>
-                <i className="fas fa-calendar-check me-1"></i> Rezerwacje
+              <button className="nav-item" onClick={() => setView('my-bookings')}>
+                <i className="fas fa-calendar-check"></i> <span>Rezerwacje</span>
               </button>
-              <button className="btn btn-outline" onClick={onShowCars}>
-                <i className="fas fa-car me-1"></i> Moje Auta
+              <button className="nav-item" onClick={onShowCars}>
+                <i className="fas fa-car"></i> <span>Auta</span>
               </button>
               {isAdmin && (
-                <button className="btn btn-primary" onClick={() => setView('admin-dashboard')}>
-                  <i className="fas fa-user-shield me-1"></i> Admin
+                <button className="nav-item" onClick={() => setView('admin-dashboard')}>
+                  <i className="fas fa-user-shield"></i> <span>Admin</span>
                 </button>
               )}
-              <div className="user-info">
-                <div className="user-avatar">{me?.first_name?.[0]}{me?.last_name?.[0]}</div>
-                <button className="btn btn-outline btn-logout" onClick={onLogout}>
-                  <i className="fas fa-sign-out-alt"></i>
-                </button>
-              </div>
+              <button className="nav-item btn-logout" onClick={onLogout}>
+                <i className="fas fa-sign-out-alt"></i> <span>Wyloguj</span>
+              </button>
             </>
           ) : (
-            <button className="btn btn-primary" onClick={() => setView('auth')}>
-              Zaloguj się
+            <button className="nav-item btn-primary-nav" onClick={() => setView('auth')}>
+              <i className="fas fa-sign-in-alt"></i> <span>Logowanie</span>
             </button>
           )}
         </div>
+
       </div>
     </nav>
   );
