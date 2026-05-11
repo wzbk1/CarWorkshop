@@ -425,9 +425,52 @@ h1, h2, h3 {
 
 
 @media (max-width: 768px) {
-  .nav-links {
-    display: none;
+  .navbar {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
   }
+
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+
+  .workshop-card {
+    flex-direction: column;
+  }
+
+  .workshop-actions {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 1rem;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .grid-2, .grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+
   .workshop-name {
     font-size: 1.4rem;
   }
